@@ -13,7 +13,7 @@ const deleteCard = (req, res) => {
 
   Card.findByIdAndRemove(id)
     .then((card) => {
-      if (!card) {
+      if (!card || card._id !== id) {
         return res.status(404).send({ message: "Id is not correct" });
       }
       return res.send({ message: "OK" });
@@ -49,7 +49,12 @@ const updateLikes = (req, res, method) => {
       new: true,
     },
   )
-    .then(() => res.status(200).send({ message: "OK" }))
+    .then((card) => {
+      if (!card) {
+        return res.status(404).send({ message: "Id is not correct" });
+      }
+      return res.status(200).send({ message: "OK" });
+    })
     .catch((err) => {
       if (err.kind === "ObjectId") {
         return res.status(400).send({ message: "Id is not correct" });
