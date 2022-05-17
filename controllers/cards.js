@@ -51,10 +51,10 @@ const updateLikes = (req, res, method) => {
       new: true,
     },
   )
-    .then((card) => res.send(card))
+    .then(() => res.status(200).send({message: "OK"}))
     .catch((err) => {
       if (err.kind === "ObjectId") {
-        return res.status(404).send({ message: "Id is not correct" });
+        return res.status(400).send({ message: "Id is not correct" });
       }
       return res.status(500).send({ message: "Server Error" });
     });
