@@ -1,5 +1,4 @@
 const Card = require("../models/Card");
-const { errorHandler } = require("./users");
 
 const getCards = (_, res) => {
   Card.find({})
@@ -33,8 +32,9 @@ const createCard = (req, res) => {
       res.status(201).send({ data: card });
     })
     .catch((err) => {
-      if (Object.keys(err.errors).join("")) {
-        errorHandler(err, req, res);
+      if (err.name === "ValidationError") {
+        const fields = Object.keys(err.errors).join(", ");
+        return res.status(400).send({ message: `${fields} is not correct` });
       }
       return res.status(500).send({ message: "Server Error" });
     });

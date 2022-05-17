@@ -1,10 +1,5 @@
 const User = require("../models/User");
 
-function errorHandler(err, _, res) {
-  const fields = Object.keys(err.errors).join(", ");
-  return res.status(400).send({ message: `${fields} is not correct` });
-}
-
 const getUsers = (_, res) => {
   User.find({})
     .then((users) => {
@@ -15,8 +10,14 @@ const getUsers = (_, res) => {
 
 const getUserById = (req, res) => {
   const id = req.user._id;
+
   User.findById(id)
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (req.params.userId !== id) {
+        return res.status(404).send({ message: "Id is not correct" });
+      }
+      return res.status(200).send(user);
+    })
     .catch((err) => {
       if (err.kind === "ObjectId") {
         return res.status(404).send({ message: "Id is not correct" });
@@ -33,8 +34,9 @@ const addUser = (req, res) => {
       res.status(201).send(user);
     })
     .catch((err) => {
-      if (Object.keys(err.errors).join("")) {
-        errorHandler(err, req, res);
+      if (err.name === "ValidationError") {
+        const fields = Object.keys(err.errors).join(", ");
+        return res.status(400).send({ message: `${fields} is not correct` });
       }
       return res.status(500).send({ message: "Server Error" });
     });
@@ -56,8 +58,9 @@ const updateUser = (req, res) => {
       res.status(201).send(user);
     })
     .catch((err) => {
-      if (err.kind === "ObjectId") {
-        errorHandler(err, req, res);
+      if (err.name === "ValidationError") {
+        const fields = Object.keys(err.errors).join(", ");
+        return res.status(400).send({ message: `${fields} is not correct` });
       }
       return res.status(500).send({ message: "Server Error" });
     });
@@ -79,11 +82,9 @@ const updateAvatar = (req, res) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.kind === "ObjectId") {
-        return res.status(404).send({ message: "Id is not correct" });
-      }
-      if (Object.keys(err.errors).join("")) {
-        errorHandler(err, req, res);
+      if (err.name === "ValidationError") {
+        const fields = Object.keys(err.errors).join(", ");
+        return res.status(400).send({ message: `${fields} is not correct` });
       }
       return res.status(500).send({ message: "Server Error" });
     });
@@ -95,5 +96,4 @@ module.exports = {
   addUser,
   updateUser,
   updateAvatar,
-  errorHandler,
 };
