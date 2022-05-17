@@ -53,9 +53,6 @@ const updateLikes = (req, res, method) => {
   )
     .then((card) => res.send(card))
     .catch((err) => {
-      if (Object.keys(err.errors).join("")) {
-        errorHandler(err, req, res);
-      }
       if (err.kind === "ObjectId") {
         return res.status(404).send({ message: "Id is not correct" });
       }

@@ -18,8 +18,3 @@ router.put("/:cardId/likes", setLike);
 router.delete("/:cardId/likes", deleteLike);
 
 module.exports = router;
-
-/*
-PUT /cards/:cardId/likes — поставить лайк карточке
-DELETE /cards/:cardId/likes — убрать лайк с карточки
-*/
