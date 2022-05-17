@@ -13,14 +13,12 @@ const deleteCard = (req, res) => {
 
   Card.findByIdAndRemove(id)
     .then((card) => {
-      res.send(card);
-    })
-    .catch((err) => {
-      if (err.kind === "ObjectId") {
+      if (!card) {
         return res.status(404).send({ message: "Id is not correct" });
       }
-      return res.status(500).send({ message: "Server Error" });
-    });
+      return res.send({ message: "OK" });
+    })
+    .catch(() => res.status(500).send({ message: "Server Error" }));
 };
 
 const createCard = (req, res) => {
