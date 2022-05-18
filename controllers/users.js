@@ -9,11 +9,12 @@ const getUsers = (_, res) => {
 };
 
 const getUserById = (req, res) => {
-  const id = req.user._id;
+  const id = req.params.userId;
 
   User.findById(id)
     .then((user) => {
-      if (req.params.userId !== id) {
+      console.log(user);
+      if (!user) {
         return res.status(400).send({ message: "Id is not correct" });
       }
       return res.status(200).send(user);
@@ -50,7 +51,7 @@ const updateUser = (req, res) => {
     },
   )
     .then((user) => {
-      res.status(201).send(user);
+      res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {

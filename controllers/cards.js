@@ -14,7 +14,7 @@ const deleteCard = (req, res) => {
   Card.findByIdAndRemove(id)
     .then((card) => {
       if (!card || card._id.toString() !== id) {
-        return res.status(404).send({ message: "Id is not correct" });
+        return res.status(400).send({ message: "Id is not correct" });
       }
       return res.send({ message: "OK" });
     })
