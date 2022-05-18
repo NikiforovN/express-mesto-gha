@@ -17,4 +17,6 @@ app.use((req, _, next) => {
 app.use("/users", require("./routes/users"));
 app.use("/cards", require("./routes/cards"));
 
+app.use("", (req, res) => res.status(404).send({ message: " Incorrect path" }));
+
 app.listen(3000);
