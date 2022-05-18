@@ -13,13 +13,18 @@ const getUserById = (req, res) => {
 
   User.findById(id)
     .then((user) => {
-      console.log(user);
       if (!user) {
-        return res.status(400).send({ message: "Id is not correct" });
+        return res.status(404).send({ message: "Id is not correct" });
       }
       return res.status(200).send(user);
     })
-    .catch(() => res.status(500).send({ message: "Server Error" }));
+    .catch((err) => {
+      if (err.kind === "ObjectId") {
+        return res.status(400).send({ message: "Id is not correct" });
+      }
+
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 const addUser = (req, res) => {
