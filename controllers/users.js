@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { NotFound } = require("../errors/NotFoundError");
 const { BadRequest } = require("../errors/BadRequestError");
-const { Unauthorized } = require("../errors/UnauthorizedError");
 const { Conflict } = require("../errors/ConflictError");
 
 const getUsers = (_, res, next) => {
@@ -48,7 +47,7 @@ const addUser = (req, res, next) => {
       avatar,
       email,
       password: hash,
-    }, { runValidators: true })
+    })
       .then((user) => {
         res.status(201).send({
           name: user.name,
@@ -119,10 +118,6 @@ const updateAvatar = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    throw new Unauthorized();
-  }
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
