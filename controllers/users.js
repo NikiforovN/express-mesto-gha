@@ -48,7 +48,7 @@ const addUser = (req, res, next) => {
       avatar,
       email,
       password: hash,
-    })
+    }, { runValidators: true })
       .then((user) => {
         res.status(201).send({
           name: user.name,
@@ -120,6 +120,10 @@ const updateAvatar = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    throw new Unauthorized();
+  }
+
   return User.findUserByCredentials(email, password)
     .then((user) => {
       res.send({
@@ -127,7 +131,7 @@ const login = (req, res, next) => {
       });
       return user;
     })
-    .catch(() => next(new Unauthorized()));
+    .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
