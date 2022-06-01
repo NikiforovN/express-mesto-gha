@@ -49,14 +49,11 @@ const addUser = (req, res, next) => {
       email,
       password: hash,
     })
-      .then(({ name,
-        about,
-        avatar,
-        email, }) => {
+      .then((user) => {
         res.status(201).send({
-          name,
-          about,
-          avatar,
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
           email,
         });
       })
