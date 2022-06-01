@@ -40,15 +40,7 @@ app.post("/signup", celebrate({
   }).unknown(true),
 }), addUser);
 
-app.use("/users", auth, celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(4),
-  }).unknown(true),
-}), require("./routes/users"));
+app.use("/users", auth, require("./routes/users"));
 app.use("/cards", auth, require("./routes/cards"));
 
 app.use("", (_, res, next) => next(new NotFound()));
