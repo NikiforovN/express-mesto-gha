@@ -1,49 +1,70 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { NotFound } = require("../errors/NotFoundError");
+const { BadRequest } = require("../errors/BadRequestError");
+const { Unauthorized } = require("../errors/UnauthorizedError");
+const { Conflict } = require("../errors/ConflictError");
 
-const getUsers = (_, res) => {
+const getUsers = (_, res, next) => {
   User.find({})
     .then((users) => {
       res.status(200).send(users);
     })
-    .catch(() => res.status(500).send({ message: "Server Error" }));
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const id = req.params.userId;
 
   User.findById(id)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: "Id is not correct" });
+        throw new NotFound();
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
       if (err.kind === "ObjectId") {
-        return res.status(400).send({ message: "Id is not correct" });
+        return next(new BadRequest("Oooops! Id is not correct"));
       }
-
-      return res.status(500).send({ message: "Server Error" });
+      return next(err);
     });
 };
 
-const addUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+const addUser = (req, res, next) => {
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => {
-      res.status(201).send(user);
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
     })
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        const fields = Object.keys(err.errors).join(", ");
-        return res.status(400).send({ message: `${fields} is not correct` });
-      }
-      return res.status(500).send({ message: "Server Error" });
-    });
+      .then((user) => {
+        res.status(201).send(user);
+      })
+      .catch((err) => {
+        if (err.name === "ValidationError") {
+          const fields = Object.keys(err.errors).join(", ");
+          return next(new BadRequest(`${fields} is not correct`));
+        }
+        if (err.code === 11000) {
+          return next(new Conflict("This email is already taken:("));
+        }
+        return next(err);
+      }));
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   const id = req.user._id;
 
@@ -61,13 +82,13 @@ const updateUser = (req, res) => {
     .catch((err) => {
       if (err.name === "ValidationError") {
         const fields = Object.keys(err.errors).join(", ");
-        return res.status(400).send({ message: `${fields} is not correct` });
+        return next(new BadRequest(`${fields} is not correct`));
       }
-      return res.status(500).send({ message: "Server Error" });
+      return next(err);
     });
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const id = req.user._id;
 
@@ -85,10 +106,32 @@ const updateAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === "ValidationError") {
         const fields = Object.keys(err.errors).join(", ");
-        return res.status(400).send({ message: `${fields} is not correct` });
+        return next(new BadRequest(`${fields} is not correct`));
       }
-      return res.status(500).send({ message: "Server Error" });
+      return next(err);
     });
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      res.send({
+        token: jwt.sign({ _id: user._id }, "super-strong-secret", { expiresIn: "7d" }),
+      });
+      return user;
+    })
+    .catch(() => next(new Unauthorized()));
+};
+
+const getCurrentUser = (req, res, next) => {
+  const { authorization } = req.headers;
+  const token = authorization.replace("Bearer ", "");
+  const payload = jwt.verify(token, "super-strong-secret");
+  User.findById(payload)
+    .then((user) => res.status(200).send(user))
+    .catch(next);
 };
 
 module.exports = {
@@ -97,4 +140,6 @@ module.exports = {
   addUser,
   updateUser,
   updateAvatar,
+  login,
+  getCurrentUser,
 };
