@@ -49,8 +49,16 @@ const addUser = (req, res, next) => {
       email,
       password: hash,
     })
-      .then((user) => {
-        res.status(201).send(user);
+      .then(({ name,
+        about,
+        avatar,
+        email, }) => {
+        res.status(201).send({
+          name,
+          about,
+          avatar,
+          email,
+        });
       })
       .catch((err) => {
         if (err.name === "ValidationError") {
