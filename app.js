@@ -7,7 +7,6 @@ const {
 } = require("./controllers/users");
 const { NotFound } = require("./errors/NotFoundError");
 const auth = require("./middlewares/auth");
-const regEx = require("./models/User");
 
 const app = express();
 
@@ -35,7 +34,7 @@ app.post("/signup", celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(new RegExp(regEx)),
+    avatar: Joi.string(),
     email: Joi.string().required().email(),
     password: Joi.string().required().min(4),
   }).unknown(true),
