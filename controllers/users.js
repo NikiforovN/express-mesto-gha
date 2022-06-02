@@ -8,7 +8,7 @@ const { Conflict } = require("../errors/ConflictError");
 const getUsers = (_, res, next) => {
   User.find({})
     .then((users) => {
-      res.status(200).send(users);
+      res.send(users);
     })
     .catch(next);
 };
@@ -127,11 +127,8 @@ const login = (req, res, next) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  const { authorization } = req.headers;
-  const token = authorization.replace("Bearer ", "");
-  const payload = jwt.verify(token, "super-strong-secret");
-  User.findById(payload)
-    .then((user) => res.status(200).send(user))
+  User.findById(req.user._id)
+    .then((user) => res.send(user))
     .catch(next);
 };
 
