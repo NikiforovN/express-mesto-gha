@@ -7,6 +7,7 @@ const {
   updateAvatar,
   getCurrentUser,
 } = require("../controllers/users");
+const regEx = require("../models/User");
 
 router.get("/", getUsers);
 router.get("/me", getCurrentUser);
@@ -22,6 +23,10 @@ router.patch("/me", celebrate({
     about: Joi.string().min(2).max(30).required(),
   }),
 }), updateUser);
-router.patch("/me/avatar", updateAvatar);
+router.patch("/me/avatar", celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().required().pattern(new RegExp(regEx)),
+  }),
+}), updateAvatar);
 
 module.exports = router;
