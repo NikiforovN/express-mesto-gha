@@ -99,10 +99,7 @@ const updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     id,
     { avatar },
-    {
-      new: true,
-      runValidators: true,
-    },
+    { new: true, runValidators: true },
   )
     .then((user) => {
       res.status(200).send(user);
