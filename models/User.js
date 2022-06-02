@@ -5,7 +5,7 @@ const isEmail = require("validator/lib/isEmail");
 const { BadRequest } = require("../errors/BadRequestError");
 const { Unauthorized } = require("../errors/UnauthorizedError");
 
-const regEx = /(https?):\/\/w?w?w?\.?[\w\W]+/g;
+const regEx = /(https?):\/\/w?w?w?\.?[\w\W]+/;
 
 const userSchema = new mongoose.Schema(
   {
