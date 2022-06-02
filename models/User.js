@@ -5,6 +5,8 @@ const isEmail = require("validator/lib/isEmail");
 const { BadRequest } = require("../errors/BadRequestError");
 const { Unauthorized } = require("../errors/UnauthorizedError");
 
+const regEx = /(https?):\/\/w?w?w?\.?[\w\W]+/;
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -23,7 +25,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png",
       validate: {
-        validator: (v) => /(https?):\/\/w?w?w?\.?[\w\W]+/g.test(v),
+        validator: (v) => regEx.test(v),
         message: "Invalid Link:(",
       },
     },
@@ -69,3 +71,4 @@ userSchema.statics.findUserByCredentials = function (email, password) {
 };
 
 module.exports = mongoose.model("user", userSchema);
+module.exports = regEx;
